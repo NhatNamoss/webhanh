@@ -1,8 +1,8 @@
 // src/routes/api.js
 const express = require('express');
 const router = express.Router();
-const AuthController = require('../app/controllers/AuthController');
-const WatchController = require('../app/controllers/WatchController');
+const AuthController = require('../app/controller/AuthController');
+const WatchController = require('../app/controller/WatchController');
 const auth = require('../app/middleware/auth');
 
 router.post('/register', AuthController.register);
