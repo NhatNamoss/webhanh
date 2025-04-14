@@ -302,6 +302,18 @@ const userNameElement = document.getElementById('userName');
 const logoutBtn = document.createElement('button');
 logoutBtn.textContent = 'Logout'; // Tạo nút Logout
 
+// Kiểm tra trạng thái đăng nhập khi trang được tải lại
+if (localStorage.getItem('token')) {
+  const token = localStorage.getItem('token');
+  const decoded = JSON.parse(atob(token.split('.')[1])); // Giải mã token
+  document.getElementById('userName').textContent = decoded.username;
+  document.getElementById('userInfo').style.display = 'block';
+  document.querySelector('.header__button').style.display = 'none';
+} else {
+  document.getElementById('userInfo').style.display = 'none';
+  document.querySelector('.header__button').style.display = 'flex';
+}
+
 // Hàm giả lập đăng nhập
 function handleLogin(username) {
   userNameElement.textContent = username;
@@ -358,14 +370,6 @@ function handleRegister(username) {
   });
 }
 
-// Kiểm tra trạng thái đăng nhập khi trang được tải lại
-window.addEventListener('load', () => {
-  const storedUsername = localStorage.getItem('username');
-  if (storedUsername) {
-    handleLogin(storedUsername); // Nếu có thông tin người dùng trong localStorage, hiển thị thông tin đó
-  }
-});
-
 // Mở pop-up đăng nhập
 loginBtn.addEventListener('click', () => {
   loginPopup.style.display = 'flex';
@@ -398,18 +402,47 @@ window.addEventListener('click', (event) => {
   }
 });
 
-// Giả lập sự kiện đăng nhập khi nhấn nút Login
-document.getElementById('loginForm').addEventListener('submit', function (e) {
+// Thay thế sự kiện giả lập đăng nhập bằng API
+document.getElementById('loginForm').addEventListener('submit', async function (e) {
   e.preventDefault(); // Ngừng hành động mặc định của form
   const username = document.getElementById('username').value;
-  handleLogin(username); // Xử lý đăng nhập
+  const password = document.getElementById('password').value;
+
+  const response = await fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  });
+
+  const data = await response.json();
+  if (response.ok) {
+    alert(data.message); // Đăng nhập thành công
+    localStorage.setItem('token', data.token); // Lưu token vào localStorage
+    handleLogin(username); // Hiển thị thông tin người dùng
+  } else {
+    alert(data.error); // Hiển thị lỗi
+  }
 });
 
-// Giả lập sự kiện đăng ký khi nhấn nút Register
-document.getElementById('registerForm').addEventListener('submit', function (e) {
+// Thay thế sự kiện giả lập đăng ký bằng API
+document.getElementById('registerForm').addEventListener('submit', async function (e) {
   e.preventDefault(); // Ngừng hành động mặc định của form
   const username = document.getElementById('regUsername').value;
-  handleRegister(username); // Xử lý đăng ký
+  const password = document.getElementById('regPassword').value;
+
+  const response = await fetch('/api/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  });
+
+  const data = await response.json();
+  if (response.ok) {
+    alert(data.message); // Đăng ký thành công
+    handleRegister(username); // Hiển thị thông tin người dùng
+  } else {
+    alert(data.error); // Hiển thị lỗi
+  }
 });
 
 </script>
